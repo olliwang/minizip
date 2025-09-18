@@ -57,7 +57,7 @@ endif()
 # to the standard ftell()/fseek(), resolving the compile error. This may
 # limit support for files > 2GB on 32-bit systems.
 if(ANDROID AND CMAKE_C_COMPILER_ID MATCHES "Clang")
-  target_compile_definitions(minizip PUBLIC "USE_FILE32API")
+  add_definitions(-DUSE_FILE32API)
 endif()
 
 # create minizip library
