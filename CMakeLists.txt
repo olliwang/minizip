@@ -55,6 +55,15 @@ set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
 set(targets_export_name "${PROJECT_NAME}Targets")
 set(namespace "${PROJECT_NAME}::")
 
+# Workaround for minizip build failure on modern NDKs (r23+).
+# Define USE_FILE32API to force a fallback from the missing ftello()/fseeko()
+# to the standard ftell()/fseek(), resolving the compile error. This may
+# limit support for files > 2GB on 32-bit systems.
+if(ANDROID AND CMAKE_C_COMPILER_ID MATCHES "Clang")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_FILE32API" CACHE STRING "C compiler flags" FORCE)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_FILE32API" CACHE STRING "C++ compiler flags" FORCE)
+endif()
+
 option(USE_AES "enables building of aes library" ON)
 if(USE_AES)
   set(AES_SRC 
