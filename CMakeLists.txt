@@ -6,7 +6,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 
-# Set a consistent MACOSX_RPATH default across all CMake versions. 
+# Set a consistent MACOSX_RPATH default across all CMake versions.
 # When CMake 2.8.12 is required, change this default to 1.
 # When CMake 3.0.0 is required, remove this block (see CMP0042).
 if(NOT DEFINED CMAKE_MACOSX_RPATH)
@@ -52,6 +52,14 @@ if(UNIX)
   add_definitions(-D_FILE_OFFSET_BIT=64)
 endif()
 
+# Workaround for minizip build failure on modern NDKs (r23+).
+# Define USE_FILE32API to force a fallback from the missing ftello()/fseeko()
+# to the standard ftell()/fseek(), resolving the compile error. This may
+# limit support for files > 2GB on 32-bit systems.
+if(ANDROID AND CMAKE_C_COMPILER_ID MATCHES "Clang")
+  target_compile_definitions(minizip PUBLIC "USE_FILE32API")
+endif()
+
 # create minizip library
 add_library(minizip ${MINIZIP_SRC} ${MINIZIP_PUBLIC_HEADERS})
 
@@ -67,7 +75,7 @@ set(namespace "${PROJECT_NAME}::")
 
 option(USE_AES "enables building of aes library" ON)
 if(USE_AES)
-  set(AES_SRC 
+  set(AES_SRC
     aes/aescrypt.c
     aes/aeskey.c
     aes/aestab.c
@@ -78,7 +86,7 @@ if(USE_AES)
     aes/pwd2key.c
     aes/sha1.c)
 
-  set(AES_PUBLIC_HEADERS 
+  set(AES_PUBLIC_HEADERS
     aes/aes.h
     aes/aes_ni.h
     aes/aesopt.h
